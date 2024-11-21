@@ -4,57 +4,78 @@
 
 package frc.robot;
 
+// Import necessary classes and packages
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.MoveMotor;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Motor;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the Robot.java
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
+ * The RobotContainer class serves as the main configuration for the robot.
+ * It declares subsystems, commands, and mappings between triggers and commands.
+ * Command-based is a "declarative" paradigm where logic is structured into commands
+ * and subsystems, leaving little logic in Robot.java's periodic methods.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
+    // Declare the robot's subsystems
+    private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem(); // Example subsystem
+    private final Motor motorSubsystem = new Motor(); // Subsystem to control a motor
+    private final DriveSubsystem driveSubsystem = new DriveSubsystem(); // Subsystem for drivetrain
 
-  private final CommandXboxController driverController =
-      new CommandXboxController(ControllerConstants.DriverPort);
+    // Declare commands
+    private final MoveMotor motorCommand = new MoveMotor(motorSubsystem); // Command to move a motor
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
-  }
+    // Controller for driver input
+    private final CommandPS4Controller driverController =
+        new CommandPS4Controller(ControllerConstants.DriverPort);
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}.
-   */
-  private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(exampleSubsystem));
+    /**
+     * The constructor for the RobotContainer.
+     * This initializes subsystems, commands, and controller mappings.
+     */
+    public RobotContainer() {
+        // Configure trigger bindings between controller inputs and commands
+        configureBindings();
+        // Configure default commands for subsystems
+        configureDefaultCommands();
+    }
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    driverController.b().whileTrue(exampleSubsystem.exampleMethodCommand());
-  }
+    /**
+     * Define mappings between controller triggers and commands.
+     * Triggers can be created directly using predicates or through named factories
+     * like {@link CommandXboxController}.
+     */
+    private void configureBindings() {
+        // Bind the "B" button on the controller to the motorCommand, keeping it active while pressed
+        // driverController.b().whileTrue(motorCommand);
+    }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(exampleSubsystem);
-  }
+    /**
+     * Configure default commands for subsystems. These commands run automatically
+     * when no other commands are actively controlling the subsystem.
+     */
+    private void configureDefaultCommands() {
+        // Set the DriveSubsystem's default command to use arcade driving
+        driveSubsystem.setDefaultCommand(
+            new DriveCommand(
+                DriveCommand.DriveMode.ARCADE, 
+                driveSubsystem, 
+                driverController
+            )
+        );
+    }
+
+    // Get the command to run during the autonomous period.
+    public Command getAutonomousCommand() {
+        // Return an example autonomous command
+        return Autos.exampleAuto(exampleSubsystem);
+    }
 }

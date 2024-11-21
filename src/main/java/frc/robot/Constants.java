@@ -16,4 +16,9 @@ public final class Constants {
   public static class ControllerConstants {
     public static final int DriverPort = 0;
   }
+  public static class DriveSubsystemConstants {
+    public static final int canLeftMotor = 2;
+    public static final int canRightMotor = 15;
+    public static final double defaultSpeedLimit = 0.35;
+  }
 }
